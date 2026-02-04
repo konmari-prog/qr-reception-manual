@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="ja">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>QRコード受付システム 構築マニュアル | GASで作る</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        primary: "#667eea",
+        "primary-dark": "#5a67d8",
+        secondary: "#764ba2",
+        accent: "#4CAF50",
+        "background-light": "#f8fafc",
+        "background-dark": "#0f172a",
+      },
+      fontFamily: {
+        display: ["Inter", "Noto Sans JP", "sans-serif"],
+        sans: ["Inter", "Noto Sans JP", "sans-serif"],
+      },
+    },
+  },
+};
+</script>
+<style>
+body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
+.hero-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.code-block {
+  background: #1e1e1e;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+}
+.code-block pre {
+  color: #9cdcfe;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 1.5rem;
+  margin: 0;
+}
+.code-block .comment { color: #6a9955; }
+.code-block .keyword { color: #569cd6; }
+.code-block .string { color: #ce9178; }
+.code-block .function { color: #dcdcaa; }
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+  <div class="flex items-center space-x-2">
+    <span class="material-icons-outlined text-primary text-3xl">qr_code_2</span>
+    <span class="font-bold text-xl tracking-tight hidden sm:block">QR Reception System</span>
+  </div>
+  <nav class="flex items-center space-x-6 text-sm font-medium">
+    <a class="hover:text-primary transition-colors" href="#features">機能</a>
+    <a class="hover:text-primary transition-colors" href="#prerequisites">準備</a>
+    <a class="hover:text-primary transition-colors" href="#steps">構築ステップ</a>
+    <a class="hover:text-primary transition-colors" href="#code">コード</a>
+    <a class="hover:text-primary transition-colors" href="#technical">技術情報</a>
+    <button class="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300" onclick="document.documentElement.classList.toggle('dark')">
+      <span class="material-icons-outlined text-[20px]">dark_mode</span>
+    </button>
+  </nav>
+</div>
+</header>
+
+<!-- Hero Section -->
+<section class="hero-gradient py-20 lg:py-32 text-white">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+  <p class="font-bold tracking-widest uppercase mb-4 text-sm text-white/80">Google Apps Script 活用講座</p>
+  <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+    QRコード受付システム<br/>
+    <span class="text-yellow-300">構築マニュアル</span>
+  </h1>
+  <p class="max-w-2xl mx-auto text-lg text-white/90 mb-10 leading-relaxed">
+    GoogleスプレッドシートとGASを組み合わせて、イベント受付を劇的に効率化。<br/>
+    プログラミング初心者でもステップバイステップで構築可能です。
+  </p>
+  <div class="flex flex-wrap justify-center gap-4">
+    <a class="px-8 py-4 bg-white text-primary font-bold rounded-full hover:bg-yellow-50 transition-all shadow-lg flex items-center" href="#steps">
+      学習を開始する
+      <span class="material-icons-outlined ml-2">arrow_forward</span>
+    </a>
+    <a class="px-8 py-4 bg-white/20 text-white font-bold rounded-full border border-white/30 hover:bg-white/30 transition-all" href="#code">
+      コードを見る
+    </a>
+  </div>
+
+  <!-- Hero Image -->
+  <div class="mt-16 max-w-4xl mx-auto">
+    <div class="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20">
+      <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+        <!-- Flow Diagram -->
+        <div class="flex items-center gap-4">
+          <div class="bg-white/20 rounded-xl p-4 text-center">
+            <span class="material-icons-outlined text-4xl mb-2">forward_to_inbox</span>
+            <p class="text-sm font-bold">QRメール送信</p>
+          </div>
+          <span class="material-icons-outlined text-2xl">arrow_forward</span>
+          <div class="bg-white/20 rounded-xl p-4 text-center">
+            <span class="material-icons-outlined text-4xl mb-2">qr_code_scanner</span>
+            <p class="text-sm font-bold">QRスキャン</p>
+          </div>
+          <span class="material-icons-outlined text-2xl">arrow_forward</span>
+          <div class="bg-accent/80 rounded-xl p-4 text-center">
+            <span class="material-icons-outlined text-4xl mb-2">check_circle</span>
+            <p class="text-sm font-bold">受付完了</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Features Section -->
+<section class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="features">
+<div class="text-center mb-16">
+  <h2 class="text-3xl font-bold dark:text-white mb-4">このシステムでできること</h2>
+  <div class="w-20 h-1.5 bg-primary mx-auto rounded-full"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+  <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow group">
+    <div class="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+      <span class="material-icons-outlined text-3xl">forward_to_inbox</span>
+    </div>
+    <h3 class="text-xl font-bold mb-3 dark:text-white">一括メール送信</h3>
+    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+      参加者リストから個別のQRコードを生成し、Gmail経由で一括送信します。
+    </p>
+  </div>
+  <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow group">
+    <div class="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+      <span class="material-icons-outlined text-3xl">photo_camera</span>
+    </div>
+    <h3 class="text-xl font-bold mb-3 dark:text-white">カメラで受付</h3>
+    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+      スマホのカメラでQRコードを読み取るだけで、瞬時に受付処理が完了。
+    </p>
+  </div>
+  <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow group">
+    <div class="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+      <span class="material-icons-outlined text-3xl">edit_note</span>
+    </div>
+    <h3 class="text-xl font-bold mb-3 dark:text-white">手動入力対応</h3>
+    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+      QRが読めない場合でも、名前検索などで手動受付が可能です。
+    </p>
+  </div>
+  <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-lg transition-shadow group">
+    <div class="w-14 h-14 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+      <span class="material-icons-outlined text-3xl">insights</span>
+    </div>
+    <h3 class="text-xl font-bold mb-3 dark:text-white">リアルタイム管理</h3>
+    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+      受付状況はスプレッドシートに即反映。来場数をリアルタイムで把握。
+    </p>
+  </div>
+</div>
+</section>
+
+<!-- Prerequisites Section -->
+<section class="py-24 bg-white dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800" id="prerequisites">
+<div class="max-w-4xl mx-auto px-4">
+  <div class="bg-slate-50 dark:bg-slate-800/50 rounded-3xl p-8 md:p-12">
+    <div class="flex items-center mb-8">
+      <span class="material-icons-outlined text-primary text-3xl mr-4">checklist</span>
+      <h2 class="text-3xl font-bold dark:text-white">必要なもの</h2>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="flex items-start">
+        <div class="bg-white dark:bg-slate-800 p-3 rounded-full shadow-sm mr-4 border border-slate-100 dark:border-slate-700">
+          <span class="material-icons-outlined text-primary">account_circle</span>
+        </div>
+        <div>
+          <h4 class="font-bold mb-1 dark:text-white text-lg">Googleアカウント</h4>
+          <p class="text-slate-500 dark:text-slate-400 text-sm">GASの実行とスプレッドシートの作成に必要です。</p>
+        </div>
+      </div>
+      <div class="flex items-start">
+        <div class="bg-white dark:bg-slate-800 p-3 rounded-full shadow-sm mr-4 border border-slate-100 dark:border-slate-700">
+          <span class="material-icons-outlined text-primary">smartphone</span>
+        </div>
+        <div>
+          <h4 class="font-bold mb-1 dark:text-white text-lg">スマホまたはPC</h4>
+          <p class="text-slate-500 dark:text-slate-400 text-sm">カメラ機能付きのもの（受付端末として利用）。</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-8 p-6 bg-primary/10 rounded-2xl border border-primary/20 flex items-center space-x-4">
+      <span class="material-icons-outlined text-primary text-2xl">info</span>
+      <p class="text-sm text-slate-700 dark:text-slate-300">
+        プログラミングの知識がなくても大丈夫です。コードはコピー＆ペーストで動作します。
+      </p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Steps Section -->
+<section class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="steps">
+<div class="text-center mb-16">
+  <h2 class="text-3xl font-bold dark:text-white mb-4">構築までのロードマップ</h2>
+  <p class="text-slate-500 dark:text-slate-400">5ステップで完成！</p>
+</div>
+
+<div class="relative">
+  <!-- Timeline line -->
+  <div class="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
+
+  <div class="space-y-16">
+    <!-- Step 1 -->
+    <div class="relative flex flex-col md:flex-row items-center">
+      <div class="w-full md:w-[45%] md:text-right md:pr-12 mb-6 md:mb-0">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <h3 class="text-xl font-bold mb-2 dark:text-white flex items-center md:justify-end gap-2">
+            <span class="material-icons-outlined text-primary">table_chart</span>
+            スプレッドシートを作成
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400">Googleドライブで新規スプレッドシートを作成します。</p>
+          <div class="mt-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg text-sm">
+            <p class="text-slate-500"><strong>操作:</strong> 「新規」→「Google スプレッドシート」</p>
+          </div>
+        </div>
+      </div>
+      <div class="z-10 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold shadow-lg ring-4 ring-background-light dark:ring-background-dark text-lg">1</div>
+      <div class="w-full md:w-[45%] md:pl-12 hidden md:block"></div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="relative flex flex-col md:flex-row items-center">
+      <div class="w-full md:w-[45%] md:pr-12 hidden md:block"></div>
+      <div class="z-10 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold shadow-lg ring-4 ring-background-light dark:ring-background-dark text-lg">2</div>
+      <div class="w-full md:w-[45%] md:pl-12 mt-6 md:mt-0">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <h3 class="text-xl font-bold mb-2 dark:text-white flex items-center gap-2">
+            <span class="material-icons-outlined text-primary">code</span>
+            Apps Script エディタを開く
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400">スプレッドシートからGASエディタを開きます。</p>
+          <div class="mt-4 p-3 bg-slate-50 dark:bg-slate-900 rounded-lg text-sm">
+            <p class="text-slate-500"><strong>操作:</strong> 「拡張機能」→「Apps Script」</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="relative flex flex-col md:flex-row items-center">
+      <div class="w-full md:w-[45%] md:text-right md:pr-12 mb-6 md:mb-0">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <h3 class="text-xl font-bold mb-2 dark:text-white flex items-center md:justify-end gap-2">
+            <span class="material-icons-outlined text-primary">content_paste</span>
+            コードを貼り付け
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400">Code.gsとindex.htmlの2ファイルを作成し、コードを貼り付けます。</p>
+          <div class="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-sm border border-amber-200 dark:border-amber-800">
+            <p class="text-amber-700 dark:text-amber-300"><strong>ポイント:</strong> HTMLファイルは「+」→「HTML」で追加</p>
+          </div>
+        </div>
+      </div>
+      <div class="z-10 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold shadow-lg ring-4 ring-background-light dark:ring-background-dark text-lg">3</div>
+      <div class="w-full md:w-[45%] md:pl-12 hidden md:block"></div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="relative flex flex-col md:flex-row items-center">
+      <div class="w-full md:w-[45%] md:pr-12 hidden md:block"></div>
+      <div class="z-10 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold shadow-lg ring-4 ring-background-light dark:ring-background-dark text-lg">4</div>
+      <div class="w-full md:w-[45%] md:pl-12 mt-6 md:mt-0">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <h3 class="text-xl font-bold mb-2 dark:text-white flex items-center gap-2">
+            <span class="material-icons-outlined text-primary">rocket_launch</span>
+            Webアプリとしてデプロイ
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400">受付画面を外部からアクセス可能にします。</p>
+          <div class="mt-4 space-y-2 text-sm text-slate-500">
+            <p>1. 「デプロイ」→「新しいデプロイ」</p>
+            <p>2. 種類: 「ウェブアプリ」</p>
+            <p>3. アクセス: 「全員」</p>
+            <p>4. 発行されたURLを保存</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="relative flex flex-col md:flex-row items-center">
+      <div class="w-full md:w-[45%] md:text-right md:pr-12 mb-6 md:mb-0">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <h3 class="text-xl font-bold mb-2 dark:text-white flex items-center md:justify-end gap-2">
+            <span class="material-icons-outlined text-accent">play_circle</span>
+            初期化を実行
+          </h3>
+          <p class="text-slate-600 dark:text-slate-400">スプレッドシートに戻り、メニューから初期化を実行します。</p>
+          <div class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm border border-green-200 dark:border-green-800">
+            <p class="text-green-700 dark:text-green-300"><strong>完了:</strong> 「設定」と「参加者リスト」シートが作成されます！</p>
+          </div>
+        </div>
+      </div>
+      <div class="z-10 w-12 h-12 bg-accent text-white rounded-full flex items-center justify-center font-bold shadow-lg ring-4 ring-background-light dark:ring-background-dark text-lg">5</div>
+      <div class="w-full md:w-[45%] md:pl-12 hidden md:block"></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Code Section -->
+<section class="py-24 bg-slate-900" id="code">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="text-center mb-16">
+    <h2 class="text-3xl font-bold text-white mb-4">コード一覧</h2>
+    <p class="text-slate-400">以下のコードをコピーして貼り付けてください</p>
+  </div>
+
+  <!-- Code.gs -->
+  <div class="mb-12">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-bold text-white flex items-center gap-2">
+        <span class="material-icons-outlined text-primary">javascript</span>
+        Code.gs
+      </h3>
+      <button onclick="copyCode('code-gs')" class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors flex items-center gap-2">
+        <span class="material-icons-outlined text-lg">content_copy</span>
+        コピー
+      </button>
+    </div>
+    <div class="code-block" id="code-gs">
+<pre><span class="comment">/**
+ * QRコード受付システム - Google Apps Script
+ */</span>
+
+<span class="comment">// シート名</span>
+<span class="keyword">const</span> SHEET = {
+  SETTINGS: <span class="string">'設定'</span>,
+  PARTICIPANTS: <span class="string">'参加者リスト'</span>,
+};
+
+<span class="comment">/**
+ * 設定シートから値を取得
+ */</span>
+<span class="keyword">function</span> <span class="function">getSettings</span>() {
+  <span class="keyword">const</span> ss = SpreadsheetApp.getActiveSpreadsheet();
+  <span class="keyword">const</span> sheet = ss.getSheetByName(SHEET.SETTINGS);
+  <span class="keyword">if</span> (!sheet) <span class="keyword">return</span> <span class="keyword">null</span>;
+
+  <span class="keyword">const</span> data = sheet.getRange(<span class="string">'A2:B10'</span>).getValues();
+  <span class="keyword">const</span> settings = {};
+  data.forEach(row => {
+    <span class="keyword">if</span> (row[0]) settings[row[0]] = row[1];
+  });
+  <span class="keyword">return</span> settings;
+}
+
+<span class="comment">/**
+ * スプレッドシートを初期化（初回のみ実行）
+ */</span>
+<span class="keyword">function</span> <span class="function">initializeSpreadsheet</span>() {
+  <span class="keyword">const</span> ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  <span class="comment">// 設定シート作成</span>
+  <span class="keyword">let</span> settingsSheet = ss.getSheetByName(SHEET.SETTINGS);
+  <span class="keyword">if</span> (!settingsSheet) {
+    settingsSheet = ss.insertSheet(SHEET.SETTINGS);
+  }
+  settingsSheet.clear();
+  settingsSheet.getRange(<span class="string">'A1:B1'</span>).setValues([[<span class="string">'項目'</span>, <span class="string">'値'</span>]]);
+  settingsSheet.getRange(<span class="string">'A1:B1'</span>).setFontWeight(<span class="string">'bold'</span>).setBackground(<span class="string">'#6aa84f'</span>).setFontColor(<span class="string">'white'</span>);
+  settingsSheet.getRange(<span class="string">'A2:B8'</span>).setValues([
+    [<span class="string">'イベント名'</span>, <span class="string">'サンプルイベント'</span>],
+    [<span class="string">'イベント日時'</span>, <span class="string">'2025年2月1日（土）13:00〜'</span>],
+    [<span class="string">'会場'</span>, <span class="string">'東京都渋谷区○○ビル 3F'</span>],
+    [<span class="string">'メール件名'</span>, <span class="string">'【{イベント名}】受付用QRコードのご案内'</span>],
+    [<span class="string">'メール本文（冒頭）'</span>, <span class="string">'この度はお申し込みいただきありがとうございます。'</span>],
+    [<span class="string">'メール本文（末尾）'</span>, <span class="string">'当日お会いできることを楽しみにしております。'</span>],
+    [<span class="string">'送信者名'</span>, <span class="string">''</span>],
+  ]);
+
+  <span class="comment">// 参加者リストシート作成</span>
+  <span class="keyword">let</span> participantsSheet = ss.getSheetByName(SHEET.PARTICIPANTS);
+  <span class="keyword">if</span> (!participantsSheet) {
+    participantsSheet = ss.insertSheet(SHEET.PARTICIPANTS);
+  }
+  participantsSheet.clear();
+  participantsSheet.getRange(<span class="string">'A1:H1'</span>).setValues([[
+    <span class="string">'受付コード'</span>, <span class="string">'名前'</span>, <span class="string">'メールアドレス'</span>, <span class="string">'所属'</span>, <span class="string">'メール送信'</span>, <span class="string">'送信日時'</span>, <span class="string">'受付状況'</span>, <span class="string">'受付日時'</span>
+  ]]);
+  participantsSheet.getRange(<span class="string">'A1:H1'</span>).setFontWeight(<span class="string">'bold'</span>).setBackground(<span class="string">'#4a86e8'</span>).setFontColor(<span class="string">'white'</span>);
+  participantsSheet.setFrozenRows(1);
+
+  <span class="comment">// サンプルデータ</span>
+  participantsSheet.getRange(<span class="string">'A2:D4'</span>).setValues([
+    [generateCode(), <span class="string">'山田太郎'</span>, <span class="string">'yamada@example.com'</span>, <span class="string">'営業部'</span>],
+    [generateCode(), <span class="string">'鈴木花子'</span>, <span class="string">'suzuki@example.com'</span>, <span class="string">'開発部'</span>],
+    [generateCode(), <span class="string">'田中一郎'</span>, <span class="string">'tanaka@example.com'</span>, <span class="string">'人事部'</span>],
+  ]);
+
+  SpreadsheetApp.getUi().alert(<span class="string">'初期化完了！'</span>);
+}
+
+<span class="comment">/**
+ * ユニークな受付コードを生成
+ */</span>
+<span class="keyword">function</span> <span class="function">generateCode</span>() {
+  <span class="keyword">const</span> chars = <span class="string">'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'</span>;
+  <span class="keyword">let</span> code = <span class="string">''</span>;
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = 0; i &lt; 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  <span class="keyword">return</span> code;
+}
+
+<span class="comment">/**
+ * 選択した行にコードを生成
+ */</span>
+<span class="keyword">function</span> <span class="function">generateCodesForSelected</span>() {
+  <span class="keyword">const</span> sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET.PARTICIPANTS);
+  <span class="keyword">const</span> range = sheet.getActiveRange();
+  <span class="keyword">const</span> startRow = range.getRow();
+  <span class="keyword">const</span> numRows = range.getNumRows();
+  <span class="keyword">let</span> count = 0;
+
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = 0; i &lt; numRows; i++) {
+    <span class="keyword">const</span> row = startRow + i;
+    <span class="keyword">if</span> (row === 1) <span class="keyword">continue</span>;
+    <span class="keyword">const</span> codeCell = sheet.getRange(row, 1);
+    <span class="keyword">if</span> (!codeCell.getValue()) {
+      codeCell.setValue(generateCode());
+      count++;
+    }
+  }
+  SpreadsheetApp.getUi().alert(`${count}件の受付コードを生成しました`);
+}
+
+<span class="comment">/**
+ * 全員にQRコード付きメールを送信
+ */</span>
+<span class="keyword">function</span> <span class="function">sendQREmailToAll</span>() {
+  <span class="keyword">const</span> ui = SpreadsheetApp.getUi();
+  <span class="keyword">const</span> settings = getSettings();
+  <span class="keyword">if</span> (!settings) {
+    ui.alert(<span class="string">'エラー'</span>, <span class="string">'設定シートが見つかりません。'</span>, ui.ButtonSet.OK);
+    <span class="keyword">return</span>;
+  }
+
+  <span class="keyword">const</span> sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET.PARTICIPANTS);
+  <span class="keyword">const</span> data = sheet.getDataRange().getValues();
+
+  <span class="keyword">let</span> unsent = 0;
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = 1; i &lt; data.length; i++) {
+    <span class="keyword">if</span> (data[i][0] && data[i][2] && data[i][4] !== <span class="string">'済'</span>) unsent++;
+  }
+
+  <span class="keyword">if</span> (unsent === 0) {
+    ui.alert(<span class="string">'全員に送信済みです'</span>);
+    <span class="keyword">return</span>;
+  }
+
+  <span class="keyword">const</span> response = ui.alert(<span class="string">'確認'</span>, `未送信の${unsent}名にメールを送信しますか？`, ui.ButtonSet.YES_NO);
+  <span class="keyword">if</span> (response !== ui.Button.YES) <span class="keyword">return</span>;
+
+  <span class="keyword">let</span> successCount = 0;
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = 1; i &lt; data.length; i++) {
+    <span class="keyword">const</span> row = i + 1;
+    <span class="keyword">const</span> code = data[i][0];
+    <span class="keyword">const</span> name = data[i][1];
+    <span class="keyword">const</span> email = data[i][2];
+    <span class="keyword">if</span> (!code || !email || data[i][4] === <span class="string">'済'</span>) <span class="keyword">continue</span>;
+
+    <span class="keyword">try</span> {
+      sendQREmail(email, name, code, settings);
+      sheet.getRange(row, 5).setValue(<span class="string">'済'</span>);
+      sheet.getRange(row, 6).setValue(<span class="keyword">new</span> Date());
+      sheet.getRange(row, 5, 1, 2).setBackground(<span class="string">'#e8f5e9'</span>);
+      successCount++;
+      Utilities.sleep(500);
+    } <span class="keyword">catch</span> (e) {
+      sheet.getRange(row, 5).setValue(<span class="string">'失敗'</span>);
+      sheet.getRange(row, 6).setValue(e.message);
+    }
+  }
+  ui.alert(`送信完了！成功: ${successCount}件`);
+}
+
+<span class="comment">/**
+ * QRコード付きメールを送信
+ */</span>
+<span class="keyword">function</span> <span class="function">sendQREmail</span>(email, name, code, settings) {
+  <span class="keyword">const</span> qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${code}`;
+  <span class="keyword">const</span> qrBlob = UrlFetchApp.fetch(qrUrl).getBlob().setName(<span class="string">'qrcode.png'</span>);
+
+  <span class="keyword">const</span> eventName = settings[<span class="string">'イベント名'</span>] || <span class="string">'イベント'</span>;
+  <span class="keyword">const</span> subject = (settings[<span class="string">'メール件名'</span>] || <span class="string">'【{イベント名}】受付用QRコード'</span>).replace(<span class="string">'{イベント名}'</span>, eventName);
+
+  <span class="keyword">const</span> htmlBody = `
+    &lt;div style="font-family: sans-serif; max-width: 600px;"&gt;
+      &lt;h2 style="color: #4a86e8;"&gt;${eventName}&lt;/h2&gt;
+      &lt;p&gt;${name} 様&lt;/p&gt;
+      &lt;p&gt;${settings[<span class="string">'メール本文（冒頭）'</span>] || <span class="string">''</span>}&lt;/p&gt;
+      &lt;div style="background: #f5f5f5; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;"&gt;
+        &lt;img src="cid:qrcode" alt="QRコード" style="width: 250px;"&gt;&lt;br&gt;
+        &lt;p style="font-size: 24px; font-weight: bold; letter-spacing: 4px;"&gt;${code}&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;p&gt;${settings[<span class="string">'メール本文（末尾）'</span>] || <span class="string">''</span>}&lt;/p&gt;
+    &lt;/div&gt;
+  `;
+
+  GmailApp.sendEmail(email, subject, <span class="string">''</span>, {
+    htmlBody: htmlBody,
+    inlineImages: { qrcode: qrBlob }
+  });
+}
+
+<span class="comment">/**
+ * Webアプリとしてデプロイ時のGET処理
+ */</span>
+<span class="keyword">function</span> <span class="function">doGet</span>(e) {
+  <span class="keyword">return</span> HtmlService.createHtmlOutputFromFile(<span class="string">'index'</span>)
+    .setTitle(<span class="string">'QRコード受付'</span>)
+    .addMetaTag(<span class="string">'viewport'</span>, <span class="string">'width=device-width, initial-scale=1'</span>);
+}
+
+<span class="comment">/**
+ * 受付処理
+ */</span>
+<span class="keyword">function</span> <span class="function">processCheckin</span>(code, method) {
+  <span class="keyword">const</span> sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET.PARTICIPANTS);
+  <span class="keyword">const</span> data = sheet.getDataRange().getValues();
+
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = 1; i &lt; data.length; i++) {
+    <span class="keyword">if</span> (data[i][0] === code) {
+      <span class="keyword">const</span> row = i + 1;
+      <span class="keyword">const</span> name = data[i][1];
+
+      <span class="keyword">if</span> (data[i][6] === <span class="string">'済'</span>) {
+        <span class="keyword">return</span> { success: <span class="keyword">false</span>, message: `${name}さんは既に受付済みです`, alreadyCheckedIn: <span class="keyword">true</span> };
+      }
+
+      <span class="keyword">const</span> now = <span class="keyword">new</span> Date();
+      sheet.getRange(row, 7).setValue(<span class="string">'済'</span>);
+      sheet.getRange(row, 8).setValue(now);
+      sheet.getRange(row, 7, 1, 2).setBackground(<span class="string">'#c8e6c9'</span>);
+
+      <span class="keyword">return</span> {
+        success: <span class="keyword">true</span>,
+        message: `${name}さんの受付完了！`,
+        name: name,
+        time: Utilities.formatDate(now, <span class="string">'Asia/Tokyo'</span>, <span class="string">'HH:mm:ss'</span>)
+      };
+    }
+  }
+  <span class="keyword">return</span> { success: <span class="keyword">false</span>, message: `コード「${code}」が見つかりません`, notFound: <span class="keyword">true</span> };
+}
+
+<span class="comment">/**
+ * 受付状況を取得
+ */</span>
+<span class="keyword">function</span> <span class="function">getReceptionStatus</span>() {
+  <span class="keyword">const</span> sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET.PARTICIPANTS);
+  <span class="keyword">const</span> data = sheet.getDataRange().getValues();
+  <span class="keyword">let</span> total = 0, checkedIn = 0;
+
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = 1; i &lt; data.length; i++) {
+    <span class="keyword">if</span> (data[i][0]) {
+      total++;
+      <span class="keyword">if</span> (data[i][6] === <span class="string">'済'</span>) checkedIn++;
+    }
+  }
+  <span class="keyword">return</span> { total, checkedIn, remaining: total - checkedIn };
+}
+
+<span class="comment">/**
+ * 参加者を検索
+ */</span>
+<span class="keyword">function</span> <span class="function">searchParticipant</span>(query) {
+  <span class="keyword">const</span> sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET.PARTICIPANTS);
+  <span class="keyword">const</span> data = sheet.getDataRange().getValues();
+  <span class="keyword">const</span> results = [];
+  <span class="keyword">const</span> q = query.toLowerCase();
+
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = 1; i &lt; data.length; i++) {
+    <span class="keyword">const</span> code = String(data[i][0]).toLowerCase();
+    <span class="keyword">const</span> name = String(data[i][1]).toLowerCase();
+    <span class="keyword">if</span> (code.includes(q) || name.includes(q)) {
+      results.push({
+        id: data[i][0],
+        name: data[i][1],
+        organization: data[i][3],
+        checkedIn: data[i][6] === <span class="string">'済'</span>
+      });
+    }
+  }
+  <span class="keyword">return</span> results;
+}
+
+<span class="comment">/**
+ * メニュー
+ */</span>
+<span class="keyword">function</span> <span class="function">onOpen</span>() {
+  SpreadsheetApp.getUi().createMenu(<span class="string">'🎫 QR受付システム'</span>)
+    .addItem(<span class="string">'📋 初期化（初回のみ）'</span>, <span class="string">'initializeSpreadsheet'</span>)
+    .addSeparator()
+    .addItem(<span class="string">'🔢 受付コード生成（選択行）'</span>, <span class="string">'generateCodesForSelected'</span>)
+    .addItem(<span class="string">'📧 QRメール送信（全員）'</span>, <span class="string">'sendQREmailToAll'</span>)
+    .addSeparator()
+    .addItem(<span class="string">'📱 受付ページを開く'</span>, <span class="string">'openReceptionPage'</span>)
+    .addToUi();
+}
+
+<span class="keyword">function</span> <span class="function">openReceptionPage</span>() {
+  <span class="keyword">const</span> url = ScriptApp.getService().getUrl();
+  <span class="keyword">if</span> (!url) {
+    SpreadsheetApp.getUi().alert(<span class="string">'まずWebアプリとしてデプロイしてください'</span>);
+    <span class="keyword">return</span>;
+  }
+  <span class="keyword">const</span> html = HtmlService.createHtmlOutput(`&lt;script&gt;window.open("${url}");google.script.host.close();&lt;/script&gt;`);
+  SpreadsheetApp.getUi().showModalDialog(html, <span class="string">'開いています...'</span>);
+}</pre>
+    </div>
+  </div>
+
+  <!-- index.html -->
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-bold text-white flex items-center gap-2">
+        <span class="material-icons-outlined text-secondary">html</span>
+        index.html
+      </h3>
+      <button onclick="copyCode('code-html')" class="px-4 py-2 bg-secondary text-white rounded-lg text-sm font-medium hover:opacity-90 transition-colors flex items-center gap-2">
+        <span class="material-icons-outlined text-lg">content_copy</span>
+        コピー
+      </button>
+    </div>
+    <div class="code-block" id="code-html">
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;base target="_top"&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;QRコード受付システム&lt;/title&gt;
+  &lt;script src="https://unpkg.com/html5-qrcode@2.3.4/html5-qrcode.min.js"&gt;&lt;/script&gt;
+  &lt;style&gt;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .container { max-width: 500px; margin: 0 auto; }
+    .header { text-align: center; color: white; margin-bottom: 20px; }
+    .header h1 { font-size: 24px; margin-bottom: 8px; }
+    .status-bar {
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-around;
+      color: white;
+    }
+    .status-item { text-align: center; }
+    .status-number { font-size: 28px; font-weight: bold; }
+    .status-label { font-size: 12px; opacity: 0.9; }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #f0f0f0;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tab.active { background: #667eea; color: white; }
+    #qr-reader { width: 100%; border-radius: 12px; overflow: hidden; }
+    .manual-input { display: none; }
+    .manual-input.active { display: block; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-weight: 600; margin-bottom: 8px; }
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    .input-group input:focus { outline: none; border-color: #667eea; }
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .btn-secondary { background: #f0f0f0; color: #333; margin-top: 8px; }
+    .result { display: none; text-align: center; padding: 24px; }
+    .result.show { display: block; }
+    .result-icon { font-size: 64px; margin-bottom: 16px; }
+    .result-success .result-icon { color: #4CAF50; }
+    .result-error .result-icon { color: #f44336; }
+    .result-warning .result-icon { color: #ff9800; }
+    .result-message { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .search-results { max-height: 300px; overflow-y: auto; }
+    .search-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .search-item:hover { background: #f5f5f5; }
+    .badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-success { background: #e8f5e9; color: #4CAF50; }
+    .badge-pending { background: #fff3e0; color: #ff9800; }
+    .hidden { display: none !important; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class="container"&gt;
+    &lt;div class="header"&gt;
+      &lt;h1&gt;🎫 QRコード受付&lt;/h1&gt;
+      &lt;div class="status-bar"&gt;
+        &lt;div class="status-item"&gt;
+          &lt;div class="status-number" id="total-count"&gt;-&lt;/div&gt;
+          &lt;div class="status-label"&gt;総参加者&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="status-item"&gt;
+          &lt;div class="status-number" id="checkedin-count"&gt;-&lt;/div&gt;
+          &lt;div class="status-label"&gt;受付済み&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="status-item"&gt;
+          &lt;div class="status-number" id="remaining-count"&gt;-&lt;/div&gt;
+          &lt;div class="status-label"&gt;未受付&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class="card"&gt;
+      &lt;div class="tabs"&gt;
+        &lt;button class="tab active" onclick="switchTab('qr')"&gt;📷 QRスキャン&lt;/button&gt;
+        &lt;button class="tab" onclick="switchTab('manual')"&gt;✏️ 手動入力&lt;/button&gt;
+      &lt;/div&gt;
+
+      &lt;div id="qr-section"&gt;
+        &lt;div id="qr-reader"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div id="manual-section" class="manual-input"&gt;
+        &lt;div class="input-group"&gt;
+          &lt;label&gt;参加者ID または 名前で検索&lt;/label&gt;
+          &lt;input type="text" id="search-input" placeholder="例: ABC12345 または 山田"
+                 oninput="handleSearch(this.value)"&gt;
+        &lt;/div&gt;
+        &lt;div id="search-results" class="search-results hidden"&gt;&lt;/div&gt;
+        &lt;button class="btn btn-primary" onclick="manualCheckin()"&gt;受付する&lt;/button&gt;
+      &lt;/div&gt;
+
+      &lt;div id="result" class="result"&gt;
+        &lt;div class="result-icon" id="result-icon"&gt;✓&lt;/div&gt;
+        &lt;div class="result-message" id="result-message"&gt;&lt;/div&gt;
+        &lt;div class="result-detail" id="result-detail"&gt;&lt;/div&gt;
+        &lt;button class="btn btn-secondary" onclick="resetScanner()"&gt;次の受付へ&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;script&gt;
+    let html5QrcodeScanner = null;
+    let isProcessing = false;
+    let selectedId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      updateStatus();
+      initQRScanner();
+      setInterval(updateStatus, 30000);
+    });
+
+    function initQRScanner() {
+      html5QrcodeScanner = new Html5Qrcode("qr-reader");
+      html5QrcodeScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess,
+        () => {}
+      ).catch(err => {
+        document.getElementById('qr-section').innerHTML =
+          '&lt;p style="color: #f44336; text-align: center; padding: 20px;"&gt;カメラを使用できません。手動入力をご利用ください。&lt;/p&gt;';
+      });
+    }
+
+    function onScanSuccess(decodedText) {
+      if (isProcessing) return;
+      isProcessing = true;
+      html5QrcodeScanner.pause();
+      processCheckin(decodedText, 'QR');
+    }
+
+    function switchTab(tab) {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(t => t.classList.remove('active'));
+      if (tab === 'qr') {
+        tabs[0].classList.add('active');
+        document.getElementById('qr-section').classList.remove('hidden');
+        document.getElementById('manual-section').classList.remove('active');
+      } else {
+        tabs[1].classList.add('active');
+        document.getElementById('qr-section').classList.add('hidden');
+        document.getElementById('manual-section').classList.add('active');
+      }
+    }
+
+    function handleSearch(query) {
+      const resultsDiv = document.getElementById('search-results');
+      if (query.length < 1) { resultsDiv.classList.add('hidden'); return; }
+
+      google.script.run
+        .withSuccessHandler(function(results) {
+          if (results.length === 0) {
+            resultsDiv.innerHTML = '&lt;p style="color: #999; padding: 12px;"&gt;該当なし&lt;/p&gt;';
+          } else {
+            resultsDiv.innerHTML = results.map(p => `
+              &lt;div class="search-item" onclick="selectParticipant('${p.id}', '${p.name}')"&gt;
+                &lt;div&gt;&lt;strong&gt;${p.name}&lt;/strong&gt;&lt;br&gt;&lt;small&gt;${p.id}&lt;/small&gt;&lt;/div&gt;
+                &lt;span class="badge ${p.checkedIn ? 'badge-success' : 'badge-pending'}"&gt;
+                  ${p.checkedIn ? '受付済' : '未受付'}
+                &lt;/span&gt;
+              &lt;/div&gt;
+            `).join('');
+          }
+          resultsDiv.classList.remove('hidden');
+        })
+        .searchParticipant(query);
+    }
+
+    function selectParticipant(id, name) {
+      selectedId = id;
+      document.getElementById('search-input').value = `${name} (${id})`;
+      document.getElementById('search-results').classList.add('hidden');
+    }
+
+    function manualCheckin() {
+      const input = document.getElementById('search-input').value.trim();
+      if (!input) { alert('IDまたは名前を入力してください'); return; }
+      processCheckin(selectedId || input, '手動');
+    }
+
+    function processCheckin(id, method) {
+      google.script.run
+        .withSuccessHandler(handleResult)
+        .withFailureHandler(err => { alert('エラー: ' + err); isProcessing = false; resetScanner(); })
+        .processCheckin(id, method);
+    }
+
+    function handleResult(response) {
+      const resultDiv = document.getElementById('result');
+      const iconDiv = document.getElementById('result-icon');
+      const messageDiv = document.getElementById('result-message');
+      const detailDiv = document.getElementById('result-detail');
+
+      if (response.success) {
+        resultDiv.className = 'result show result-success';
+        iconDiv.textContent = '✓';
+        messageDiv.textContent = response.message;
+        detailDiv.textContent = `受付時刻: ${response.time}`;
+        updateStatus();
+      } else if (response.alreadyCheckedIn) {
+        resultDiv.className = 'result show result-warning';
+        iconDiv.textContent = '⚠';
+        messageDiv.textContent = response.message;
+        detailDiv.textContent = '';
+      } else {
+        resultDiv.className = 'result show result-error';
+        iconDiv.textContent = '✗';
+        messageDiv.textContent = response.message;
+        detailDiv.textContent = 'IDを確認してください';
+      }
+
+      document.getElementById('qr-section').classList.add('hidden');
+      document.getElementById('manual-section').classList.remove('active');
+      isProcessing = false;
+      selectedId = null;
+    }
+
+    function resetScanner() {
+      document.getElementById('result').classList.remove('show');
+      document.getElementById('qr-section').classList.remove('hidden');
+      document.getElementById('search-input').value = '';
+      document.getElementById('search-results').classList.add('hidden');
+
+      const activeTab = document.querySelector('.tab.active');
+      if (activeTab.textContent.includes('QR') && html5QrcodeScanner) {
+        html5QrcodeScanner.resume();
+      } else {
+        document.getElementById('manual-section').classList.add('active');
+      }
+    }
+
+    function updateStatus() {
+      google.script.run
+        .withSuccessHandler(function(status) {
+          document.getElementById('total-count').textContent = status.total;
+          document.getElementById('checkedin-count').textContent = status.checkedIn;
+          document.getElementById('remaining-count').textContent = status.remaining;
+        })
+        .getReceptionStatus();
+    }
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Troubleshooting Section -->
+<section class="py-24 bg-slate-50 dark:bg-slate-900">
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="text-center mb-12">
+    <h2 class="text-3xl font-bold dark:text-white mb-4">トラブルシューティング</h2>
+  </div>
+
+  <div class="space-y-4">
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+      <div class="flex items-start gap-4">
+        <span class="material-icons-outlined text-amber-600 text-2xl">warning</span>
+        <div>
+          <h4 class="font-bold text-amber-800 dark:text-amber-200 mb-1">メニューに「QR受付システム」が表示されない</h4>
+          <p class="text-amber-700 dark:text-amber-300 text-sm">ページを再読み込み（F5キー）してください。初回は数秒かかる場合があります。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+      <div class="flex items-start gap-4">
+        <span class="material-icons-outlined text-amber-600 text-2xl">warning</span>
+        <div>
+          <h4 class="font-bold text-amber-800 dark:text-amber-200 mb-1">「承認が必要です」と表示される</h4>
+          <p class="text-amber-700 dark:text-amber-300 text-sm">「権限を確認」→「詳細」→「安全ではないページに移動」→「許可」の順でクリックしてください。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
+      <div class="flex items-start gap-4">
+        <span class="material-icons-outlined text-amber-600 text-2xl">warning</span>
+        <div>
+          <h4 class="font-bold text-amber-800 dark:text-amber-200 mb-1">カメラが起動しない</h4>
+          <p class="text-amber-700 dark:text-amber-300 text-sm">ブラウザのカメラ許可を確認してください。HTTPSでのみ動作します。手動入力タブも使用できます。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
+      <div class="flex items-start gap-4">
+        <span class="material-icons-outlined text-green-600 text-2xl">lightbulb</span>
+        <div>
+          <h4 class="font-bold text-green-800 dark:text-green-200 mb-1">コード変更後は再デプロイが必要</h4>
+          <p class="text-green-700 dark:text-green-300 text-sm">「デプロイ」→「デプロイを管理」→「新しいバージョン」で更新できます。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Technical Reference Section -->
+<section class="py-24 bg-white dark:bg-slate-800" id="technical">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="text-center mb-16">
+    <h2 class="text-3xl font-bold dark:text-white mb-4">技術リファレンス</h2>
+    <p class="text-slate-500 dark:text-slate-400">使用しているAPIとサービスの詳細情報</p>
+  </div>
+
+  <!-- QR Code API Section -->
+  <div class="mb-12">
+    <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+          <span class="material-icons-outlined text-2xl">qr_code_2</span>
+        </div>
+        <h3 class="text-2xl font-bold dark:text-white">QR Code Generator API</h3>
+      </div>
+
+      <div class="prose dark:prose-invert max-w-none">
+        <p class="text-slate-600 dark:text-slate-300 mb-4">
+          本システムでは、<strong>goQR.me</strong> が提供する無料のQRコード生成APIを使用しています。
+        </p>
+
+        <div class="bg-white dark:bg-slate-800 rounded-xl p-6 mb-6 border border-slate-200 dark:border-slate-600">
+          <h4 class="font-bold text-lg mb-3 dark:text-white flex items-center gap-2">
+            <span class="material-icons-outlined text-primary">link</span>
+            API エンドポイント
+          </h4>
+          <code class="block bg-slate-100 dark:bg-slate-700 p-3 rounded-lg text-sm break-all">
+            https://api.qrserver.com/v1/create-qr-code/
+          </code>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-600">
+            <h4 class="font-bold mb-3 dark:text-white flex items-center gap-2">
+              <span class="material-icons-outlined text-green-500">check_circle</span>
+              主な特徴
+            </h4>
+            <ul class="text-sm text-slate-600 dark:text-slate-300 space-y-2">
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-0.5">✓</span>
+                <span><strong>完全無料</strong>：商用利用も可能</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-0.5">✓</span>
+                <span><strong>登録不要</strong>：APIキー不要で即利用可</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-0.5">✓</span>
+                <span><strong>高可用性</strong>：安定したサービス提供</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-green-500 mt-0.5">✓</span>
+                <span><strong>カスタマイズ</strong>：サイズ・色・余白など調整可</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-600">
+            <h4 class="font-bold mb-3 dark:text-white flex items-center gap-2">
+              <span class="material-icons-outlined text-primary">settings</span>
+              使用パラメータ
+            </h4>
+            <ul class="text-sm text-slate-600 dark:text-slate-300 space-y-2">
+              <li><code class="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">size</code>：画像サイズ（例: 250x250）</li>
+              <li><code class="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">data</code>：埋め込むデータ（受付コード）</li>
+              <li><code class="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">format</code>：画像形式（png, jpg, svg等）</li>
+              <li><code class="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">margin</code>：余白サイズ（デフォルト: 1）</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-5 border border-blue-200 dark:border-blue-800">
+          <h4 class="font-bold mb-2 text-blue-800 dark:text-blue-200 flex items-center gap-2">
+            <span class="material-icons-outlined">code</span>
+            本システムでの使用例
+          </h4>
+          <code class="block bg-white dark:bg-slate-800 p-3 rounded-lg text-sm text-slate-700 dark:text-slate-300 break-all">
+            https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=ABC12345
+          </code>
+          <p class="text-sm text-blue-700 dark:text-blue-300 mt-3">
+            受付コード「ABC12345」を含む250×250ピクセルのQRコード画像を生成します。
+          </p>
+        </div>
+
+        <div class="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+          <p class="text-sm text-amber-700 dark:text-amber-300 flex items-start gap-2">
+            <span class="material-icons-outlined text-lg">info</span>
+            <span>
+              <strong>公式ドキュメント：</strong>
+              <a href="https://goqr.me/api/" target="_blank" class="underline hover:no-underline">https://goqr.me/api/</a>
+              - 詳細なパラメータや高度な使用方法はこちらを参照してください。
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gmail Quota Section -->
+  <div>
+    <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-700">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center">
+          <span class="material-icons-outlined text-2xl">email</span>
+        </div>
+        <h3 class="text-2xl font-bold dark:text-white">Gmail 送信上限（Quota）</h3>
+      </div>
+
+      <p class="text-slate-600 dark:text-slate-300 mb-6">
+        Google Apps Scriptから<code class="bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">GmailApp.sendEmail()</code>を使用してメールを送信する場合、<strong>Googleアカウントの種類によって1日あたりの送信上限が異なります</strong>。
+      </p>
+
+      <div class="overflow-x-auto mb-6">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-slate-200 dark:bg-slate-700">
+              <th class="border border-slate-300 dark:border-slate-600 px-4 py-3 text-left font-bold">アカウント種別</th>
+              <th class="border border-slate-300 dark:border-slate-600 px-4 py-3 text-left font-bold">1日あたりの送信上限</th>
+              <th class="border border-slate-300 dark:border-slate-600 px-4 py-3 text-left font-bold">備考</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-slate-800">
+            <tr>
+              <td class="border border-slate-300 dark:border-slate-600 px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <span class="material-icons-outlined text-slate-500">person</span>
+                  <span>無料の個人アカウント<br><span class="text-xs text-slate-500">（@gmail.com）</span></span>
+                </div>
+              </td>
+              <td class="border border-slate-300 dark:border-slate-600 px-4 py-3">
+                <span class="text-2xl font-bold text-primary">100件</span><span class="text-slate-500">/日</span>
+              </td>
+              <td class="border border-slate-300 dark:border-slate-600 px-4 py-3 text-sm text-slate-600 dark:text-slate-400">
+                小規模イベント向け
+              </td>
+            </tr>
+            <tr class="bg-slate-50 dark:bg-slate-900">
+              <td class="border border-slate-300 dark:border-slate-600 px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <span class="material-icons-outlined text-blue-500">business</span>
+                  <span>Google Workspace<br><span class="text-xs text-slate-500">（旧G Suite / 有料プラン）</span></span>
+                </div>
+              </td>
+              <td class="border border-slate-300 dark:border-slate-600 px-4 py-3">
+                <span class="text-2xl font-bold text-green-600">1,500件</span><span class="text-slate-500">/日</span>
+              </td>
+              <td class="border border-slate-300 dark:border-slate-600 px-4 py-3 text-sm text-slate-600 dark:text-slate-400">
+                大規模イベント・企業利用向け
+              </td>
+            </tr>
+            <tr>
+              <td class="border border-slate-300 dark:border-slate-600 px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <span class="material-icons-outlined text-purple-500">school</span>
+                  <span>Google Workspace for Education<br><span class="text-xs text-slate-500">（教育機関向け）</span></span>
+                </div>
+              </td>
+              <td class="border border-slate-300 dark:border-slate-600 px-4 py-3">
+                <span class="text-2xl font-bold text-purple-600">1,500件</span><span class="text-slate-500">/日</span>
+              </td>
+              <td class="border border-slate-300 dark:border-slate-600 px-4 py-3 text-sm text-slate-600 dark:text-slate-400">
+                学校・大学でのイベント向け
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-5 border border-amber-200 dark:border-amber-800">
+          <h4 class="font-bold mb-2 text-amber-800 dark:text-amber-200 flex items-center gap-2">
+            <span class="material-icons-outlined">warning</span>
+            上限に達した場合
+          </h4>
+          <ul class="text-sm text-amber-700 dark:text-amber-300 space-y-1">
+            <li>• 24時間後に上限がリセットされます</li>
+            <li>• 上限超過分は「失敗」として記録されます</li>
+            <li>• 翌日に未送信分を再送信してください</li>
+          </ul>
+        </div>
+
+        <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-5 border border-green-200 dark:border-green-800">
+          <h4 class="font-bold mb-2 text-green-800 dark:text-green-200 flex items-center gap-2">
+            <span class="material-icons-outlined">tips_and_updates</span>
+            大量送信のコツ
+          </h4>
+          <ul class="text-sm text-green-700 dark:text-green-300 space-y-1">
+            <li>• 数日前から分割して送信する</li>
+            <li>• 本システムは送信済みをスキップします</li>
+            <li>• 100名超の場合はWorkspaceを検討</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-5 border border-blue-200 dark:border-blue-800">
+        <p class="text-sm text-blue-700 dark:text-blue-300 flex items-start gap-2">
+          <span class="material-icons-outlined text-lg">info</span>
+          <span>
+            <strong>公式ドキュメント：</strong>
+            <a href="https://developers.google.com/apps-script/guides/services/quotas" target="_blank" class="underline hover:no-underline">Google Apps Script Quotas</a>
+            - 最新の上限情報はこちらで確認できます。上限は予告なく変更される場合があります。
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 hero-gradient text-white text-center">
+<div class="max-w-4xl mx-auto px-4">
+  <h2 class="text-3xl md:text-4xl font-bold mb-6">今すぐシステム構築を始めましょう</h2>
+  <p class="text-white/80 mb-10 text-lg">専門知識は最小限でOK。マニュアルに従って進めるだけで、独自の受付システムが完成します。</p>
+  <div class="flex items-center justify-center gap-2 text-white/70">
+    <span class="material-icons-outlined">schedule</span>
+    <span>構築時間の目安：約30分</span>
+  </div>
+</div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-white dark:bg-slate-900 py-12 border-t border-slate-200 dark:border-slate-800">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="flex flex-col md:flex-row justify-between items-center">
+    <div class="flex items-center space-x-2 mb-4 md:mb-0">
+      <span class="material-icons-outlined text-primary">qr_code_2</span>
+      <span class="font-bold text-lg">QR Reception System</span>
+    </div>
+    <div class="text-slate-500 dark:text-slate-400 text-sm">
+      © 2025 QR受付システム 構築マニュアル
+    </div>
+  </div>
+</div>
+</footer>
+
+<script>
+function copyCode(elementId) {
+  const codeElement = document.getElementById(elementId);
+  const text = codeElement.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('コードをコピーしました！');
+  }).catch(err => {
+    console.error('コピーに失敗:', err);
+  });
+}
+</script>
+
+</body>
+</html>
